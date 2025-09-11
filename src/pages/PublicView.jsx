@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../supabaseClient';
 import { Link } from 'react-router-dom';
 
 const ADMIN_UID = 'db907f6a-cf81-4169-8271-d062fa56e093';
 
-// دالة مخصصة لتنسيق التاريخ بالأرقام اللاتينية
 function formatDate(dateString) {
   if (!dateString) return null;
   const date = new Date(dateString);
@@ -14,7 +13,7 @@ function formatDate(dateString) {
   return `${day}/${month}/${year}`;
 }
 
-function CountdownTimer({ targetDate }) {
+function CountdownTimer({ targetDate, startDate }) {
   const calculateTimeLeft = () => {
     const difference = +new Date(targetDate) - +new Date();
     let timeLeft = {};
@@ -41,7 +40,7 @@ function CountdownTimer({ targetDate }) {
 
   return (
     <div className="countdown card">
-      <h3>العد التنازلي للموعد النهائي (15/07/2026)</h3>
+      <h3>العد التنازلي (من {startDate} إلى {targetDate.substring(0, 10).split('-').reverse().join('/')})</h3>
       {timerComponents.length ? timerComponents : <span>انتهى الوقت!</span>}
     </div>
   );
@@ -69,17 +68,10 @@ export default function PublicView({ session }) {
     const fetchStudentsProgress = async () => {
       if (!selectedGroup || groups.length === 0) return;
       setLoading(true);
-
       const currentGroup = groups.find(g => g.id.toString() === selectedGroup.toString());
-      if (!currentGroup) {
-        setLoading(false);
-        return;
-      }
+      if (!currentGroup) { setLoading(false); return; }
       
-      const { data: studentsData, error } = await supabase.rpc('get_students_progress_by_group', {
-        p_group_id: selectedGroup
-      });
-
+      const { data: studentsData, error } = await supabase.rpc('get_students_progress_by_group', { p_group_id: selectedGroup });
       if (error) {
         console.error('Error fetching students progress:', error);
         setStudentsProgress([]);
@@ -89,23 +81,34 @@ export default function PublicView({ session }) {
           const targetVerses = currentGroup.target_verses || 1;
           const remainingVerses = Math.max(0, targetVerses - totalMemorized);
           const percentage = ((totalMemorized / targetVerses) * 100).toFixed(1);
-          
-          return {
-            ...student,
-            total_memorized: totalMemorized,
-            remaining_verses: remainingVerses,
-            percentage: percentage,
-          };
+          return { ...student, total_memorized: totalMemorized, remaining_verses: remainingVerses, percentage: percentage };
         });
-
         calculatedProgress.sort((a, b) => b.percentage - a.percentage);
         setStudentsProgress(calculatedProgress);
       }
       setLoading(false);
     };
-
     fetchStudentsProgress();
   }, [selectedGroup, groups]);
+
+  // ======== (بداية الإضافة: حسابات التقدم الإجمالي للمجموعة) ========
+  const groupProgress = useMemo(() => {
+    if (!selectedGroup || groups.length === 0 || studentsProgress.length === 0) {
+      return { totalMemorized: 0, totalTarget: 0, percentage: 0 };
+    }
+    const currentGroup = groups.find(g => g.id.toString() === selectedGroup.toString());
+    if (!currentGroup) return { totalMemorized: 0, totalTarget: 0, percentage: 0 };
+
+    // الهدف الإجمالي هو هدف المجموعة مضروبًا في عدد الطلاب
+    const totalTarget = currentGroup.target_verses * studentsProgress.length;
+    // المجموع المحفوظ هو مجموع ما حفظه كل الطلاب
+    const totalMemorized = studentsProgress.reduce((sum, student) => sum + student.total_memorized, 0);
+    // النسبة المئوية للإنجاز
+    const percentage = totalTarget > 0 ? ((totalMemorized / totalTarget) * 100).toFixed(1) : 0;
+
+    return { totalMemorized, totalTarget, percentage };
+  }, [studentsProgress, selectedGroup, groups]);
+  // ======== (نهاية الإضافة) ========
 
   return (
     <div className="container">
@@ -118,7 +121,7 @@ export default function PublicView({ session }) {
         )}
       </div>
 
-      <CountdownTimer targetDate="2026-07-15T00:00:00" />
+      <CountdownTimer startDate="10/09/2025" targetDate="2026-07-15T00:00:00" />
       
       <div className="card filters">
         <h3>اختر المجموعة لعرض بياناتها:</h3>
@@ -128,9 +131,25 @@ export default function PublicView({ session }) {
       </div>
 
       {loading ? (
-        <div className="card"><p>...جاري تحميل بيانات الطلاب</p></div>
+        <div className="card"><p>...جاري تحميل البيانات</p></div>
       ) : (
         <div className="card">
+          {/* ======== (بداية الإضافة: عرض شريط تقدم المجموعة) ======== */}
+          <div className="group-progress-section">
+            <h4>التقدم الإجمالي للمجموعة</h4>
+            <div className="progress-cell">
+              <div className="progress-bar-shell">
+                <div className="progress-bar-fill" style={{ width: `${groupProgress.percentage}%` }}></div>
+              </div>
+              <span className="percentage-text">{groupProgress.percentage}%</span>
+            </div>
+            <div className="group-stats-details">
+              <span>المجموع المحفوظ: <strong className="stat-number">{groupProgress.totalMemorized}</strong></span>
+              <span>الهدف الإجمالي للمجموعة: <strong className="stat-number">{groupProgress.totalTarget}</strong></span>
+            </div>
+          </div>
+          {/* ======== (نهاية الإضافة) ======== */}
+
           <div className="table-wrapper">
             <table>
               <thead>

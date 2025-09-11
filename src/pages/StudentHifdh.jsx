@@ -46,6 +46,38 @@ export default function StudentHifdh() {
     fetchData();
   }, [fetchData]);
 
+  // ======== (بداية التعديل: إعداد قوائم الآيات) ========
+  const selectedSurahInfo = useMemo(() => {
+    return surahData.find(s => s.name === selectedSurahName);
+  }, [selectedSurahName]);
+
+  const startVerseOptions = useMemo(() => {
+    if (!selectedSurahInfo) return [];
+    return Array.from({ length: selectedSurahInfo.verse_count }, (_, i) => i + 1);
+  }, [selectedSurahInfo]);
+
+  const endVerseOptions = useMemo(() => {
+    if (!selectedSurahInfo || !startVerse) return [];
+    const startNum = parseInt(startVerse);
+    // القائمة تبدأ من آية البداية نفسها
+    return Array.from({ length: selectedSurahInfo.verse_count - startNum + 1 }, (_, i) => startNum + i);
+  }, [selectedSurahInfo, startVerse]);
+
+  // عند تغيير السورة، قم بإعادة تعيين الآيات
+  const handleSurahChange = (newSurahName) => {
+    setSelectedSurahName(newSurahName);
+    setStartVerse('');
+    setEndVerse('');
+    setIsCompleteSurah(false);
+  };
+  
+  // عند تغيير آية البداية، أعد تعيين آية النهاية
+  const handleStartVerseChange = (newStartVerse) => {
+    setStartVerse(newStartVerse);
+    setEndVerse(''); 
+  };
+  // ======== (نهاية التعديل) ========
+  
   const checkVerseOverlap = useCallback((surahName, newStart, newEnd, recordIdToIgnore = null) => {
     const existingRecordsForSurah = records.filter(r => r.surahs.name === surahName && r.id !== recordIdToIgnore);
     for (const record of existingRecordsForSurah) {
@@ -58,13 +90,12 @@ export default function StudentHifdh() {
 
   const handleAddRecord = async (e) => {
     e.preventDefault();
-    if (!startVerse || !endVerse) return alert('الرجاء تعبئة حقلي البداية والنهاية.');
+    if (!startVerse || !endVerse) return alert('الرجاء اختيار آية البداية والنهاية.');
     const newStartVerse = parseInt(startVerse);
     const newEndVerse = parseInt(endVerse);
     const surahInfo = surahData.find(s => s.name === selectedSurahName);
     if (!surahInfo) return alert('لم يتم العثور على معلومات السورة.');
-    if (newStartVerse > newEndVerse) return alert('آية البداية يجب أن تكون أصغر من أو تساوي آية النهاية.');
-    if (newEndVerse > surahInfo.verse_count) return alert(`رقم آية النهاية يتجاوز عدد آيات السورة (${surahInfo.verse_count}).`);
+    
     if (checkVerseOverlap(selectedSurahName, newStartVerse, newEndVerse)) {
       return alert('خطأ: المقطع الذي أدخلته يتداخل مع مقطع آخر محفوظ مسبقًا في نفس السورة.');
     }
@@ -173,7 +204,6 @@ export default function StudentHifdh() {
     return statusMap;
   }, [records]);
 
-  // ======== (بداية الإضافة الجديدة: منطق تجميع السجلات) ========
   const groupedRecords = useMemo(() => {
     const monthNames = ["", "يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
     const groups = {};
@@ -182,15 +212,12 @@ export default function StudentHifdh() {
       const year = date.getFullYear();
       const month = date.getMonth() + 1;
       const monthName = monthNames[month];
-      
       if (!groups[year]) groups[year] = {};
       if (!groups[year][month]) groups[year][month] = { name: monthName, records: [] };
-      
       groups[year][month].records.push(record);
     });
     return groups;
   }, [records]);
-  // ======== (نهاية الإضافة الجديدة) ========
 
   const availableSurahsForBulkAdd = useMemo(() => {
     return surahData
@@ -200,8 +227,6 @@ export default function StudentHifdh() {
   
   if (loading) return <div>...جاري تحميل بيانات الطالب</div>;
   if (!student) return <div>لم يتم العثور على الطالب. <Link to="/admin" className="btn btn-secondary">العودة</Link></div>;
-
-  const selectedSurahInfo = surahData.find(s => s.name === selectedSurahName);
   
   return (
     <div className="admin-dashboard">
@@ -212,25 +237,35 @@ export default function StudentHifdh() {
 
       <div className="admin-section card">
         <h3>إضافة مقطع محفوظ جديد</h3>
+        {/* ======== (بداية التعديل على النموذج) ======== */}
         <form onSubmit={handleAddRecord} className="form-grid">
-          <select value={selectedSurahName} onChange={e => setSelectedSurahName(e.target.value)}>
-            {surahData.map(s => <option key={s.name} value={s.name}>{s.name}</option>)}
+          <select value={selectedSurahName} onChange={(e) => handleSurahChange(e.target.value)}>
+            {surahData.map((s) => (<option key={s.name} value={s.name}>{s.name}</option>))}
           </select>
-          <input type="number" placeholder="من الآية" value={startVerse} onChange={e => setStartVerse(e.target.value)} disabled={isCompleteSurah} min="1" />
-          <input type="number" placeholder="إلى الآية" value={endVerse} onChange={e => setEndVerse(e.target.value)} disabled={isCompleteSurah} min={startVerse || 1} max={selectedSurahInfo?.verse_count}/>
-          <input type="date" value={recordedAt} onChange={e => setRecordedAt(e.target.value)} />
+
+          <select value={startVerse} onChange={(e) => handleStartVerseChange(e.target.value)} disabled={isCompleteSurah}>
+            <option value="" disabled>من الآية</option>
+            {startVerseOptions.map(v => <option key={v} value={v}>{v}</option>)}
+          </select>
+
+          <select value={endVerse} onChange={(e) => setEndVerse(e.target.value)} disabled={isCompleteSurah || !startVerse}>
+            <option value="" disabled>إلى الآية</option>
+            {endVerseOptions.map(v => <option key={v} value={v}>{v}</option>)}
+          </select>
+          
+          <input type="date" value={recordedAt} onChange={(e) => setRecordedAt(e.target.value)} />
           <button type="submit" className="btn-primary">إضافة</button>
         </form>
+        {/* ======== (نهاية التعديل على النموذج) ======== */}
         <div className="form-options">
           <div className="checkbox-item">
-            <input type="checkbox" id="completeSurah" checked={isCompleteSurah} onChange={e => handleCompleteSurahToggle(e.target.checked)} />
+            <input type="checkbox" id="completeSurah" checked={isCompleteSurah} onChange={(e) => handleCompleteSurahToggle(e.target.checked)} />
             <label htmlFor="completeSurah">السورة كاملة</label>
           </div>
           <button onClick={() => setIsModalOpen(true)} className="btn-success">إضافة سور دفعة واحدة</button>
         </div>
       </div>
 
-      {/* ======== (بداية التعديل: عرض السجلات في قوائم منسدلة) ======== */}
       <div className="admin-section card">
         <h3>سجل الحفظ ({records.length} سجل)</h3>
         {records.length > 0 ? (
@@ -241,31 +276,33 @@ export default function StudentHifdh() {
                 {Object.keys(groupedRecords[year]).sort((a, b) => b - a).map(month => (
                   <details key={`${year}-${month}`} className="month-group" open={String(month) === String(new Date().getMonth() + 1)}>
                     <summary>{groupedRecords[year][month].name}</summary>
-                    <table>
-                      <thead>
-                        <tr>
-                          <th>السورة</th>
-                          <th>من - إلى</th>
-                          <th>التاريخ</th>
-                          <th>الإجراءات</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {groupedRecords[year][month].records.map(record => (
-                          <tr key={record.id}>
-                            <td>{record.surahs.name}</td>
-                            <td>{record.start_verse} - {record.end_verse}</td>
-                            <td>{new Date(record.recorded_at).toLocaleDateString('ar-EG')}</td>
-                            <td>
-                              <div style={{display: 'flex', gap: '0.5rem'}}>
-                                <button onClick={() => setEditingRecord(record)} className="btn-secondary" style={{padding: '0.5em 1em'}}>تعديل</button>
-                                <button onClick={() => handleDeleteRecord(record.id)} className="btn-danger" style={{padding: '0.5em 1em'}}>حذف</button>
-                              </div>
-                            </td>
+                    <div className="table-wrapper">
+                      <table>
+                        <thead>
+                          <tr>
+                            <th>السورة</th>
+                            <th>من - إلى</th>
+                            <th>التاريخ</th>
+                            <th>الإجراءات</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody>
+                          {groupedRecords[year][month].records.map(record => (
+                            <tr key={record.id}>
+                              <td>{record.surahs.name}</td>
+                              <td>{record.start_verse} - {record.end_verse}</td>
+                              <td>{new Date(record.recorded_at).toLocaleDateString('ar-EG')}</td>
+                              <td>
+                                <div style={{display: 'flex', gap: '0.5rem'}}>
+                                  <button onClick={() => setEditingRecord(record)} className="btn-secondary" style={{padding: '0.5em 1em'}}>تعديل</button>
+                                  <button onClick={() => handleDeleteRecord(record.id)} className="btn-danger" style={{padding: '0.5em 1em'}}>حذف</button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </details>
                 ))}
               </details>
@@ -275,7 +312,6 @@ export default function StudentHifdh() {
           <p style={{textAlign: 'center', padding: '1rem'}}>لا توجد سجلات حفظ لهذا الطالب بعد.</p>
         )}
       </div>
-      {/* ======== (نهاية التعديل) ======== */}
 
       <div className="admin-section card">
         <h3>خريطة الحفظ</h3>

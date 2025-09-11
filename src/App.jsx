@@ -9,6 +9,7 @@ import StudentHifdh from './pages/StudentHifdh';
 // UID الخاص بك كمحفّظ
 const ADMIN_UID = 'db907f6a-cf81-4169-8271-d062fa56e093';
 
+
 // مكون لحماية المسارات الخاصة بالمدير
 function ProtectedRoute({ children, session }) {
   // إذا كان المستخدم مسجلاً وهو المدير، اسمح بالوصول

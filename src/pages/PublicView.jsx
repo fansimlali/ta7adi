@@ -37,7 +37,6 @@ function CountdownTimer({ targetDate }) {
   );
 }
 
-
 export default function PublicView({ session }) {
   const [loading, setLoading] = useState(true);
   const [groups, setGroups] = useState([]);
@@ -88,15 +87,11 @@ export default function PublicView({ session }) {
             percentage: percentage,
           };
         });
-
-        // فرز الطلاب من الأعلى نسبة إلى الأقل
         calculatedProgress.sort((a, b) => b.percentage - a.percentage);
-        
         setStudentsProgress(calculatedProgress);
       }
       setLoading(false);
     };
-
     fetchStudentsProgress();
   }, [selectedGroup, groups]);
 
@@ -124,43 +119,39 @@ export default function PublicView({ session }) {
         <div className="card"><p>...جاري تحميل بيانات الطلاب</p></div>
       ) : (
         <div className="card">
-          <table>
-            <thead>
-              <tr>
-                <th>الرتبة</th>
-                <th>الطالب</th>
-                <th style={{width: '40%'}}>نسبة الإنجاز</th>
-                <th>المحفوظ</th>
-                <th>المتبقي</th>
-              </tr>
-            </thead>
-            <tbody>
-              {studentsProgress.length > 0 ? studentsProgress.map((student, index) => (
-                <tr key={student.id}>
-                  <td>
-                    <span className="rank-circle">{index + 1}</span>
-                  </td>
-                  <td>{student.full_name}</td>
-                  <td className="progress-cell">
-                    <div className="progress-bar-shell">
-                      <div className="progress-bar-fill" style={{ width: `${student.percentage}%` }}></div>
-                    </div>
-                    <span className="percentage-text">{student.percentage}%</span>
-                  </td>
-                  <td>
-                    <strong className="stat-number">{student.total_memorized}</strong>
-                  </td>
-                  <td>
-                    <strong className="stat-number">{student.remaining_verses}</strong>
-                  </td>
-                </tr>
-              )) : (
+          <div className="table-wrapper">
+            <table>
+              <thead>
                 <tr>
-                  <td colSpan="5" style={{textAlign: 'center'}}>لا يوجد طلاب في هذه المجموعة بعد.</td>
+                  <th>الرتبة</th>
+                  <th>الطالب</th>
+                  <th style={{minWidth: '250px'}}>نسبة الإنجاز</th>
+                  <th>المحفوظ</th>
+                  <th>المتبقي</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {studentsProgress.length > 0 ? studentsProgress.map((student, index) => (
+                  <tr key={student.id}>
+                    <td><span className="rank-circle">{index + 1}</span></td>
+                    <td>{student.full_name}</td>
+                    <td className="progress-cell">
+                      <div className="progress-bar-shell">
+                        <div className="progress-bar-fill" style={{ width: `${student.percentage}%` }}></div>
+                      </div>
+                      <span className="percentage-text">{student.percentage}%</span>
+                    </td>
+                    <td><strong className="stat-number">{student.total_memorized}</strong></td>
+                    <td><strong className="stat-number">{student.remaining_verses}</strong></td>
+                  </tr>
+                )) : (
+                  <tr>
+                    <td colSpan="5" style={{textAlign: 'center'}}>لا يوجد طلاب في هذه المجموعة بعد.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>

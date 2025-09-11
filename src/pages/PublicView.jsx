@@ -1,8 +1,18 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { Link } from 'react-router-dom';
 
 const ADMIN_UID = 'db907f6a-cf81-4169-8271-d062fa56e093';
+
+// دالة مخصصة لتنسيق التاريخ بالأرقام اللاتينية
+function formatDate(dateString) {
+  if (!dateString) return null;
+  const date = new Date(dateString);
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+}
 
 function CountdownTimer({ targetDate }) {
   const calculateTimeLeft = () => {
@@ -87,11 +97,13 @@ export default function PublicView({ session }) {
             percentage: percentage,
           };
         });
+
         calculatedProgress.sort((a, b) => b.percentage - a.percentage);
         setStudentsProgress(calculatedProgress);
       }
       setLoading(false);
     };
+
     fetchStudentsProgress();
   }, [selectedGroup, groups]);
 
@@ -125,7 +137,7 @@ export default function PublicView({ session }) {
                 <tr>
                   <th>الرتبة</th>
                   <th>الطالب</th>
-                  <th style={{minWidth: '250px'}}>نسبة الإنجاز</th>
+                  <th style={{minWidth: '300px'}}>نسبة الإنجاز وآخر تحديث</th>
                   <th>المحفوظ</th>
                   <th>المتبقي</th>
                 </tr>
@@ -135,11 +147,18 @@ export default function PublicView({ session }) {
                   <tr key={student.id}>
                     <td><span className="rank-circle">{index + 1}</span></td>
                     <td>{student.full_name}</td>
-                    <td className="progress-cell">
-                      <div className="progress-bar-shell">
-                        <div className="progress-bar-fill" style={{ width: `${student.percentage}%` }}></div>
+                    <td>
+                      <div className="progress-cell">
+                        <div className="progress-bar-shell">
+                          <div className="progress-bar-fill" style={{ width: `${student.percentage}%` }}></div>
+                        </div>
+                        <span className="percentage-text">{student.percentage}%</span>
                       </div>
-                      <span className="percentage-text">{student.percentage}%</span>
+                      {student.last_recorded_at && (
+                        <div className="last-update-info">
+                          آخر حفظ: {student.last_surah_name} ({student.last_start_verse}-{student.last_end_verse}) بتاريخ {formatDate(student.last_recorded_at)}
+                        </div>
+                      )}
                     </td>
                     <td><strong className="stat-number">{student.total_memorized}</strong></td>
                     <td><strong className="stat-number">{student.remaining_verses}</strong></td>

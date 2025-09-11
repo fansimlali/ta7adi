@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 
-export default function BulkAddSurahModal({ isOpen, onClose, onSave, availableSurahs }) {
+// تمت إضافة خصائص جديدة: title, actionButtonText, actionButtonClass
+export default function BulkAddSurahModal({ isOpen, onClose, onSave, availableSurahs, title, actionButtonText, actionButtonClass }) {
   const [selected, setSelected] = useState([]);
 
   if (!isOpen) return null;
@@ -14,6 +15,11 @@ export default function BulkAddSurahModal({ isOpen, onClose, onSave, availableSu
   };
 
   const handleSave = () => {
+    // التأكد من وجود سور محددة قبل الحفظ
+    if (selected.length === 0) {
+      alert("الرجاء اختيار سورة واحدة على الأقل.");
+      return;
+    }
     onSave(selected);
     setSelected([]);
     onClose();
@@ -22,24 +28,31 @@ export default function BulkAddSurahModal({ isOpen, onClose, onSave, availableSu
   return (
     <div className="modal-backdrop">
       <div className="modal-content">
-        <h2>إضافة سور كاملة دفعة واحدة</h2>
-        <p>اختر السور التي أتم الطالب حفظها بالكامل. سيتم تجاهل أي سور محفوظة جزئيًا أو كليًا من قبل.</p>
+        {/* استخدام العنوان الديناميكي */}
+        <h2>{title}</h2>
         <div className="surah-checkbox-grid">
-          {availableSurahs.map(surahName => (
-            <div key={surahName} className="checkbox-item">
-              <input
-                type="checkbox"
-                id={`surah-${surahName}`}
-                checked={selected.includes(surahName)}
-                onChange={() => handleCheckboxChange(surahName)}
-              />
-              <label htmlFor={`surah-${surahName}`}>{surahName}</label>
-            </div>
-          ))}
+          {availableSurahs.length > 0 ? (
+            availableSurahs.map(surahName => (
+              <div key={surahName} className="checkbox-item">
+                <input
+                  type="checkbox"
+                  id={`surah-${surahName}`}
+                  checked={selected.includes(surahName)}
+                  onChange={() => handleCheckboxChange(surahName)}
+                />
+                <label htmlFor={`surah-${surahName}`}>{surahName}</label>
+              </div>
+            ))
+          ) : (
+            <p>لا توجد سور متاحة لهذه العملية.</p>
+          )}
         </div>
         <div className="modal-actions">
           <button onClick={onClose} className="btn-secondary">إلغاء</button>
-          <button onClick={handleSave} className="btn-primary">حفظ السور المحددة</button>
+          {/* استخدام نص ولون الزر الديناميكي */}
+          <button onClick={handleSave} className={actionButtonClass}>
+            {actionButtonText}
+          </button>
         </div>
       </div>
     </div>

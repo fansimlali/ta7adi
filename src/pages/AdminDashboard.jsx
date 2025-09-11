@@ -3,14 +3,8 @@ import { supabase } from '../supabaseClient';
 import { useNavigate, Link } from 'react-router-dom';
 import EditStudentModal from '../components/EditStudentModal';
 
-function StudentCard({ student, onDataChange, onEdit }) {
+function StudentCard({ student, groups, onDataChange, onEdit }) {
   const navigate = useNavigate();
-
-  // حسابات التقدم
-  const totalMemorized = student.total_memorized || 0;
-  const targetVerses = student.target_verses || 1; // Avoid division by zero
-  const remainingVerses = Math.max(0, targetVerses - totalMemorized);
-  const percentage = ((totalMemorized / targetVerses) * 100).toFixed(1);
 
   const handleDeleteStudent = async () => {
     if (window.confirm(`هل أنت متأكد من حذف الطالب "${student.full_name}" وكل سجلاته؟`)) {
@@ -23,37 +17,16 @@ function StudentCard({ student, onDataChange, onEdit }) {
   return (
     <div className="student-card card">
       <div className="student-card-header">
-        {/* ======== (بداية التعديل 1: إزالة اسم المجموعة) ======== */}
-        <h4>{student.full_name}</h4>
+        <h4>{student.full_name} <small>({groups.find(g => g.id === student.group_id)?.name})</small></h4>
         <div className="card-actions">
           <button onClick={() => onEdit(student)} className="btn-secondary">تعديل</button>
           <button onClick={handleDeleteStudent} className="btn-danger">حذف</button>
         </div>
       </div>
-
-      {/* ======== (بداية التعديل 2: إضافة قسم التقدم) ======== */}
-      <div className="student-card-progress">
-        <div className="progress-stats">
-          <div className="stat-item">
-            <span>المحفوظ</span>
-            <strong>{totalMemorized}</strong>
-          </div>
-          <div className="stat-item">
-            <span>المتبقي</span>
-            <strong>{remainingVerses}</strong>
-          </div>
-        </div>
-        <div className="progress-bar-shell admin-bar">
-          <div className="progress-bar-fill" style={{ width: `${percentage}%` }}></div>
-        </div>
-        <span className="percentage-text-card">{percentage}%</span>
-      </div>
-      {/* ======== (نهاية التعديل 2) ======== */}
-      
       <button 
         onClick={() => navigate(`/admin/student/${student.id}`)} 
         className="btn-primary" 
-        style={{width: '100%', marginTop: '1.5rem'}}
+        style={{width: '100%', marginTop: '1rem'}}
       >
         إدارة سجلات الحفظ
       </button>
@@ -65,26 +38,31 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [groups, setGroups] = useState([]);
-  const [students, setStudents] = useState([]);
+  const [allStudents, setAllStudents] = useState([]); // <-- قائمة الطلاب الأصلية
   const [newStudentName, setNewStudentName] = useState('');
   const [newStudentGroup, setNewStudentGroup] = useState('');
-  const [selectedGroupFilter, setSelectedGroupFilter] = useState('all');
   const [editingStudent, setEditingStudent] = useState(null);
+
+  // ======== (بداية الإضافة: حالات الفلترة والبحث) ========
+  const [selectedGroupFilter, setSelectedGroupFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
+  // ======== (نهاية الإضافة) ========
   
   const fetchData = async () => {
     setLoading(true);
-    // ======== (بداية التعديل 3: استخدام الدالة الجديدة) ========
-    const { data: studentsWithProgress, error: rpcError } = await supabase.rpc('get_all_students_with_progress');
-    if(rpcError) console.error("Error fetching student progress:", rpcError);
-    else setStudents(studentsWithProgress || []);
-    // ======== (نهاية التعديل 3) ========
+    const [groupsRes, studentsRes] = await Promise.all([
+      supabase.from('groups').select('*'),
+      supabase.from('students').select('*').order('created_at', { ascending: false })
+    ]);
 
-    const { data: groupsData, error: groupsError } = await supabase.from('groups').select('*');
-    if (groupsError) console.error(groupsError.message);
+    if (groupsRes.error) console.error(groupsRes.error.message);
     else {
-      setGroups(groupsData);
-      if (groupsData.length > 0) setNewStudentGroup(groupsData[0].id);
+      setGroups(groupsRes.data);
+      if (groupsRes.data.length > 0) setNewStudentGroup(groupsRes.data[0].id);
     }
+
+    if (studentsRes.error) console.error(studentsRes.error.message);
+    else setAllStudents(studentsRes.data || []);
     
     setLoading(false);
   };
@@ -101,7 +79,11 @@ export default function AdminDashboard() {
       group_id: newStudentGroup,
     });
     if (error) alert('حدث خطأ: ' + error.message);
-    else { alert("تمت إضافة الطالب بنجاح."); setNewStudentName(''); fetchData(); }
+    else {
+      alert("تمت إضافة الطالب بنجاح.");
+      setNewStudentName('');
+      fetchData();
+    }
   };
 
   const handleLogout = async () => {
@@ -109,9 +91,17 @@ export default function AdminDashboard() {
     navigate('/');
   };
 
-  const filteredStudents = selectedGroupFilter === 'all'
-    ? students
-    : students.filter(student => student.group_id.toString() === selectedGroupFilter);
+  // ======== (بداية التعديل: منطق الفلترة والبحث المدمج) ========
+  const filteredStudents = allStudents
+    .filter(student => {
+      // الفلترة حسب المجموعة
+      return selectedGroupFilter === 'all' || student.group_id.toString() === selectedGroupFilter;
+    })
+    .filter(student => {
+      // الفلترة حسب نص البحث (يتجاهل حالة الأحرف)
+      return student.full_name.toLowerCase().includes(searchTerm.toLowerCase());
+    });
+  // ======== (نهاية التعديل) ========
 
   return (
     <div className="admin-dashboard">
@@ -135,15 +125,24 @@ export default function AdminDashboard() {
       </div>
 
       <div className="admin-section card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.5rem', marginBottom: '1rem' }}>
           <h3>قائمة الطلاب ({filteredStudents.length})</h3>
+          
+          {/* ======== (بداية الإضافة: خانة البحث والفلترة) ======== */}
           <div className="form-inline">
-            <label htmlFor="groupFilter" style={{fontWeight: '600'}}>فلترة حسب:</label>
-            <select id="groupFilter" value={selectedGroupFilter} onChange={(e) => setSelectedGroupFilter(e.target.value)}>
+            <input 
+              type="text"
+              placeholder="ابحث عن اسم الطالب..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{flexGrow: 2}}
+            />
+            <select id="groupFilter" value={selectedGroupFilter} onChange={(e) => setSelectedGroupFilter(e.target.value)} style={{flexGrow: 1}}>
               <option value="all">كل المجموعات</option>
               {groups.map(g => (<option key={g.id} value={g.id}>{g.name}</option>))}
             </select>
           </div>
+          {/* ======== (نهاية الإضافة) ======== */}
         </div>
         
         {loading ? <p>...جاري التحميل</p> : (
@@ -153,6 +152,7 @@ export default function AdminDashboard() {
                 <StudentCard 
                   key={student.id} 
                   student={student} 
+                  groups={groups}
                   onDataChange={fetchData}
                   onEdit={() => setEditingStudent(student)}
                 />
@@ -160,7 +160,7 @@ export default function AdminDashboard() {
             </div>
           ) : (
             <p style={{marginTop: '1.5rem', textAlign: 'center'}}>
-              {selectedGroupFilter === 'all' ? 'لم يتم إضافة أي طلاب بعد.' : 'لا يوجد طلاب في هذه المجموعة.'}
+              لا توجد نتائج تطابق بحثك أو الفلتر المحدد.
             </p>
           )
         )}

@@ -1,0 +1,1261 @@
+/* src/index.css - التصميم الاحترافي المحسّن والتفاعلي */
+
+/* ======== 1. استيراد الخطوط العصرية ======== */
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* ======== 2. إعدادات أساسية ومتغيرات متطورة ======== */
+:root {
+  /* الخطوط */
+  --font-primary: 'Cairo', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-secondary: 'Amiri', Georgia, serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* نظام الألوان المتقدم */
+  --primary-50: #f0f4ff;
+  --primary-100: #e0ecff;
+  --primary-200: #c7ddff;
+  --primary-300: #a5c4ff;
+  --primary-400: #7fa1ff;
+  --primary-500: #667eea;
+  --primary-600: #5a67d8;
+  --primary-700: #4c51bf;
+  --primary-800: #434190;
+  --primary-900: #3c366b;
+
+  /* متغيرات التصميم المحدثة */
+  --border-radius: 16px;
+  --border-radius-lg: 24px;
+  --border-radius-xl: 32px;
+  --border-radius-full: 9999px;
+  
+  /* خلفيات وألوان */
+  --light-bg: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  --light-card-bg: rgba(255, 255, 255, 0.95);
+  --light-card-bg-hover: rgba(255, 255, 255, 1);
+  --light-text-primary: #0f172a;
+  --light-text-secondary: #64748b;
+  --light-text-muted: #94a3b8;
+  --light-border: rgba(226, 232, 240, 0.6);
+  --light-border-hover: rgba(148, 163, 184, 0.8);
+  
+  /* الظلال المتدرجة */
+  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  --shadow-colored: 0 8px 32px rgba(102, 126, 234, 0.35);
+  --shadow-success: 0 8px 32px rgba(34, 197, 94, 0.35);
+  --shadow-warning: 0 8px 32px rgba(251, 191, 36, 0.35);
+  --shadow-danger: 0 8px 32px rgba(239, 68, 68, 0.35);
+  
+  /* التدرجات الحديثة */
+  --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  --gradient-primary-hover: linear-gradient(135deg, #5a67d8 0%, #6b46c1 50%, #ec4899 100%);
+  --gradient-success: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%);
+  --gradient-warning: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%);
+  --gradient-danger: linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%);
+  --gradient-info: linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%);
+  --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.1) 100%);
+  --gradient-bg-animated: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #4facfe);
+  
+  /* الانتقالات السلسة */
+  --transition-all: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  --transition-fast: all 0.2s cubic-bezier(0.23, 1, 0.32, 1);
+  --transition-slow: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+  --transition-spring: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  
+  /* المسافات */
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 1rem;
+  --spacing-md: 1.5rem;
+  --spacing-lg: 2rem;
+  --spacing-xl: 3rem;
+  --spacing-2xl: 4rem;
+  
+  /* الأحجام */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 2rem;
+  --text-4xl: 2.5rem;
+}
+
+/* ======== 3. إعداد عام محسّن ======== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+body {
+  font-family: var(--font-primary);
+  direction: rtl;
+  min-height: 100vh;
+  background: var(--light-bg);
+  color: var(--light-text-primary);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* خلفية متحركة مبدعة */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--gradient-bg-animated);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+  opacity: 0.03;
+  z-index: -2;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* نقاط مضيئة متحركة */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(circle at 20% 80%, rgba(102, 126, 234, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(118, 75, 162, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(240, 147, 251, 0.1) 0%, transparent 50%);
+  animation: float 20s ease-in-out infinite;
+  z-index: -1;
+  pointer-events: none;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(180deg); }
+}
+
+#root {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: var(--spacing-lg);
+  width: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+/* ======== 4. تنسيقات العناصر المطورة ======== */
+
+/* العناوين المحسّنة */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-primary);
+  font-weight: 800;
+  color: var(--light-text-primary);
+  margin-bottom: var(--spacing-md);
+  line-height: 1.2;
+  position: relative;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+h1 { 
+  font-size: var(--text-4xl);
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  position: relative;
+  animation: titleGlow 3s ease-in-out infinite alternate;
+}
+
+@keyframes titleGlow {
+  from { filter: brightness(1) saturate(1); }
+  to { filter: brightness(1.1) saturate(1.2); }
+}
+
+h2 { font-size: var(--text-3xl); }
+h3 { font-size: var(--text-2xl); }
+h4 { font-size: var(--text-xl); }
+
+p { 
+  color: var(--light-text-secondary);
+  margin-bottom: var(--spacing-sm);
+}
+
+/* الأزرار الاحترافية المطورة */
+.btn, button {
+  padding: 18px 32px;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-size: var(--text-base);
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  transition: var(--transition-all);
+  position: relative;
+  overflow: hidden;
+  font-family: var(--font-primary);
+  text-transform: none;
+  letter-spacing: 0.025em;
+  backdrop-filter: blur(10px);
+  border: 1px solid transparent;
+  user-select: none;
+}
+
+/* تأثير الموجة على الأزرار */
+.btn::before, button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transition: width 0.6s ease, height 0.6s ease;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+}
+
+.btn:active::before, button:active::before {
+  width: 300px;
+  height: 300px;
+}
+
+.btn > *, button > * {
+  position: relative;
+  z-index: 1;
+}
+
+.btn:hover, button:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: var(--shadow-2xl);
+}
+
+.btn:active, button:active {
+  transform: translateY(-1px) scale(0.98);
+}
+
+.btn-primary, button[type="submit"] {
+  background: var(--gradient-primary);
+  color: white;
+  box-shadow: var(--shadow-colored);
+}
+
+.btn-primary:hover, button[type="submit"]:hover {
+  background: var(--gradient-primary-hover);
+  box-shadow: var(--shadow-colored), var(--shadow-xl);
+}
+
+.btn-secondary {
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 50%, #374151 100%);
+  color: white;
+  box-shadow: 0 8px 32px rgba(107, 114, 128, 0.35);
+}
+
+.btn-danger, button.danger {
+  background: var(--gradient-danger);
+  color: white;
+  box-shadow: var(--shadow-danger);
+}
+
+.btn-success {
+  background: var(--gradient-success);
+  color: white;
+  box-shadow: var(--shadow-success);
+}
+
+/* حقول الإدخال المطورة */
+input, select, textarea {
+  padding: 20px 28px;
+  border-radius: var(--border-radius);
+  font-size: var(--text-base);
+  border: 2px solid var(--light-border);
+  background: rgba(248, 250, 252, 0.8);
+  backdrop-filter: blur(10px);
+  color: var(--light-text-primary);
+  width: 100%;
+  transition: var(--transition-all);
+  font-family: var(--font-primary);
+  position: relative;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--primary-500);
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1), var(--shadow-md);
+  background: rgba(255, 255, 255, 0.95);
+  transform: translateY(-1px);
+}
+
+input:hover, select:hover, textarea:hover {
+  border-color: var(--light-border-hover);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+/* البطاقات الاحترافية الجديدة */
+.card, .admin-section {
+  background: var(--light-card-bg);
+  backdrop-filter: blur(20px);
+  padding: var(--spacing-xl);
+  border-radius: var(--border-radius-xl);
+  margin-bottom: var(--spacing-lg);
+  border: 1px solid var(--light-border);
+  box-shadow: var(--shadow-lg);
+  transition: var(--transition-all);
+  position: relative;
+  overflow: hidden;
+}
+
+/* تأثير الضوء على البطاقات */
+.card::before, .admin-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--gradient-primary);
+  opacity: 0;
+  transition: var(--transition-all);
+}
+
+.card:hover, .admin-section:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-2xl);
+  background: var(--light-card-bg-hover);
+  border-color: var(--light-border-hover);
+}
+
+.card:hover::before, .admin-section:hover::before {
+  opacity: 1;
+}
+
+/* ======== 5. تنسيقات خاصة بالمكونات المطورة ======== */
+
+/* صفحة تسجيل الدخول المحسّنة */
+.form-container {
+  max-width: 520px;
+  margin: 5rem auto;
+  text-align: center;
+  position: relative;
+}
+
+.form-container::before {
+  content: '';
+  position: absolute;
+  top: -50px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 100px;
+  background: var(--gradient-primary);
+  border-radius: 50%;
+  opacity: 0.1;
+  filter: blur(40px);
+}
+
+.form-container form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-lg);
+}
+
+/* رأس الصفحات المطور */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-xl);
+  padding: var(--spacing-xl);
+  border-radius: var(--border-radius-xl);
+  background: var(--light-card-bg);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--light-border);
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  overflow: hidden;
+}
+
+.header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--gradient-primary);
+  opacity: 0.8;
+}
+
+.header h1 {
+  margin: 0;
+  font-family: var(--font-secondary);
+}
+
+.header a {
+  text-decoration: none;
+  font-weight: 600;
+  position: relative;
+  z-index: 1;
+}
+
+/* لوحة تحكم المدير المطورة */
+.admin-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  text-align: right;
+}
+
+.form-inline {
+  display: flex;
+  gap: var(--spacing-md);
+  align-items: center;
+  flex-wrap: wrap;
+  background: rgba(255, 255, 255, 0.5);
+  padding: var(--spacing-lg);
+  border-radius: var(--border-radius-lg);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--light-border);
+}
+
+.form-inline input { flex-grow: 2; }
+.form-inline select { flex-grow: 1; }
+
+.students-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: var(--spacing-lg);
+  margin-top: var(--spacing-lg);
+}
+
+.student-card {
+  padding: var(--spacing-lg);
+  transition: var(--transition-spring);
+  position: relative;
+  overflow: hidden;
+}
+
+.student-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--gradient-primary);
+  opacity: 0;
+  transition: var(--transition-all);
+  pointer-events: none;
+}
+
+.student-card:hover::after {
+  opacity: 0.05;
+}
+
+.student-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid var(--light-border);
+  padding-bottom: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+  position: relative;
+}
+
+.student-card h4 {
+  margin: 0;
+  font-size: var(--text-xl);
+  position: relative;
+  z-index: 1;
+}
+
+/* صفحة إدارة الحفظ المطورة */
+.form-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr auto;
+  gap: var(--spacing-sm);
+  align-items: center;
+  background: rgba(255, 255, 255, 0.6);
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius);
+  margin-bottom: var(--spacing-sm);
+  border: 1px solid var(--light-border);
+  transition: var(--transition-all);
+}
+
+.form-grid:hover {
+  background: rgba(255, 255, 255, 0.8);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--spacing-lg);
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+  background: rgba(248, 250, 252, 0.6);
+  padding: var(--spacing-lg);
+  border-radius: var(--border-radius-lg);
+  backdrop-filter: blur(10px);
+}
+
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: var(--border-radius);
+  transition: var(--transition-all);
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid var(--light-border);
+}
+
+.checkbox-item:hover {
+  background: rgba(255, 255, 255, 0.9);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.checkbox-item input[type="checkbox"] {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--primary-500);
+  border-radius: 4px;
+}
+
+/* خريطة السور المطورة والتفاعلية */
+.surah-map-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-lg);
+}
+
+.surah-tile {
+  padding: var(--spacing-md) 12px;
+  border-radius: var(--border-radius-lg);
+  text-align: center;
+  font-size: var(--text-sm);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 110px;
+  transition: var(--transition-spring);
+  border: 2px solid transparent;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+}
+
+.surah-tile::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--gradient-primary);
+  opacity: 0;
+  transition: var(--transition-all);
+  z-index: -1;
+}
+
+.surah-tile:hover {
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: var(--shadow-xl);
+}
+
+.surah-tile span {
+  font-weight: 700;
+  position: relative;
+  z-index: 1;
+}
+
+.surah-tile small {
+  font-size: var(--text-xs);
+  opacity: 0.9;
+  margin-top: 6px;
+  position: relative;
+  z-index: 1;
+}
+
+.surah-tile.not-started {
+  background: rgba(248, 250, 252, 0.9);
+  border-color: var(--light-border);
+  color: var(--light-text-secondary);
+}
+
+.surah-tile.not-started:hover {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: var(--primary-200);
+}
+
+.surah-tile.in-progress {
+  background: linear-gradient(135deg, rgba(255, 251, 235, 0.9) 0%, rgba(254, 243, 199, 0.9) 100%);
+  border-color: var(--gradient-warning);
+  color: #b45309;
+  box-shadow: var(--shadow-warning);
+}
+
+.surah-tile.in-progress:hover::before {
+  opacity: 0.1;
+}
+
+.surah-tile.completed {
+  background: var(--gradient-success);
+  border-color: transparent;
+  color: white;
+  box-shadow: var(--shadow-success);
+}
+
+.surah-tile.completed:hover {
+  box-shadow: var(--shadow-success), var(--shadow-xl);
+}
+
+.surah-tile .progress-bar-container {
+  height: 10px;
+  width: 85%;
+  margin-top: 10px;
+  border-radius: 5px;
+  overflow: hidden;
+  background-color: rgba(0, 0, 0, 0.15);
+  position: relative;
+  z-index: 1;
+}
+
+.surah-tile .progress-bar-fill {
+  height: 100%;
+  border-radius: 5px;
+  background: linear-gradient(90deg, #10b981, #059669);
+  transition: var(--transition-all);
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.4);
+}
+
+/* النافذة المنبثقة المطورة */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(20px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: modalFadeIn 0.3s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-content {
+  background: var(--light-card-bg);
+  backdrop-filter: blur(20px);
+  padding: var(--spacing-2xl);
+  border-radius: var(--border-radius-xl);
+  width: 90%;
+  max-width: 750px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-2xl);
+  border: 1px solid var(--light-border);
+  position: relative;
+  animation: modalSlideIn 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@keyframes modalSlideIn {
+  from { transform: translateY(-50px) scale(0.95); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.modal-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--gradient-primary);
+}
+
+.surah-checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: var(--spacing-md);
+  margin: var(--spacing-lg) 0;
+  text-align: right;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-xl);
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid var(--light-border);
+}
+
+/* ======== 6. تحسينات إضافية وحديثة ======== */
+
+/* شريط التحميل المتحرك */
+.loading-bar {
+  width: 100%;
+  height: 4px;
+  background: var(--light-border);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+
+.loading-bar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: var(--gradient-primary);
+  animation: loadingSlide 2s ease-in-out infinite;
+}
+
+@keyframes loadingSlide {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* تأثيرات النجوم المتحركة */
+.stars-effect {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.star {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: var(--primary-300);
+  border-radius: 50%;
+  opacity: 0;
+  animation: starTwinkle 3s ease-in-out infinite;
+}
+
+@keyframes starTwinkle {
+  0%, 100% { opacity: 0; transform: scale(0); }
+  50% { opacity: 1; transform: scale(1); }
+}
+
+/* تحسين الاستجابة للشاشات المختلفة */
+@media (max-width: 1024px) {
+  .students-grid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+  .surah-map-grid {
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  #root { padding: var(--spacing-sm); }
+  .header, .card, .admin-section { padding: var(--spacing-lg); }
+  
+  h1 { font-size: var(--text-3xl); }
+  h2 { font-size: var(--text-2xl); }
+  
+  .form-grid { 
+    grid-template-columns: 1fr; 
+    gap: var(--spacing-sm);
+  }
+  
+  .form-options { 
+    flex-direction: column; 
+    align-items: stretch;
+    gap: var(--spacing-sm);
+  }
+  
+  .form-inline { 
+    flex-direction: column; 
+    align-items: stretch;
+    gap: var(--spacing-sm);
+  }
+  
+  .students-grid { 
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+  
+  .surah-map-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: var(--spacing-sm);
+  }
+  
+  .surah-tile {
+    min-height: 90px;
+    padding: var(--spacing-sm) 8px;
+  }
+  
+  .modal-content {
+    width: 95%;
+    padding: var(--spacing-lg);
+    border-radius: var(--border-radius-lg);
+  }
+  
+  .surah-checkbox-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: var(--spacing-sm);
+  }
+  
+  .btn, button {
+    padding: 16px 24px;
+    font-size: var(--text-sm);
+  }
+  
+  input, select, textarea {
+    padding: 16px 20px;
+    font-size: var(--text-sm);
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    flex-direction: column;
+    text-align: center;
+    gap: var(--spacing-md);
+  }
+  
+  .form-container {
+    margin: 2rem auto;
+    padding: var(--spacing-sm);
+  }
+  
+  .surah-map-grid {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  }
+  
+  .surah-tile {
+    min-height: 70px;
+    font-size: var(--text-xs);
+  }
+  
+  .modal-content {
+    width: 98%;
+    margin: var(--spacing-sm);
+    max-height: 95vh;
+  }
+}
+
+/* ======== 7. تحسينات إضافية للإنتاجية والأداء ======== */
+
+/* تأثير النبض للعناصر المهمة */
+.pulse-effect {
+  animation: gentlePulse 2s ease-in-out infinite;
+}
+
+@keyframes gentlePulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.02); opacity: 0.9; }
+}
+
+/* تحسين الأداء للحركات */
+.card, .student-card, .surah-tile, .btn, button {
+  will-change: transform, box-shadow;
+}
+
+/* إزالة التأثيرات للمستخدمين الذين يفضلون تقليل الحركة */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .btn:hover, button:hover,
+  .card:hover, .admin-section:hover,
+  .surah-tile:hover, .student-card:hover {
+    transform: none;
+  }
+}
+
+/* تحسين الطباعة */
+@media print {
+  body::before, body::after,
+  .stars-effect, .loading-bar {
+    display: none;
+  }
+  
+  .card, .admin-section {
+    box-shadow: none;
+    border: 1px solid #ccc;
+  }
+  
+  .btn, button {
+    background: #fff !important;
+    color: #000 !important;
+    border: 1px solid #000;
+  }
+}
+
+/* ======== 8. فئات مساعدة إضافية ======== */
+
+/* فئات المسافات */
+.mt-xs { margin-top: var(--spacing-xs); }
+.mt-sm { margin-top: var(--spacing-sm); }
+.mt-md { margin-top: var(--spacing-md); }
+.mt-lg { margin-top: var(--spacing-lg); }
+.mt-xl { margin-top: var(--spacing-xl); }
+
+.mb-xs { margin-bottom: var(--spacing-xs); }
+.mb-sm { margin-bottom: var(--spacing-sm); }
+.mb-md { margin-bottom: var(--spacing-md); }
+.mb-lg { margin-bottom: var(--spacing-lg); }
+.mb-xl { margin-bottom: var(--spacing-xl); }
+
+.p-xs { padding: var(--spacing-xs); }
+.p-sm { padding: var(--spacing-sm); }
+.p-md { padding: var(--spacing-md); }
+.p-lg { padding: var(--spacing-lg); }
+.p-xl { padding: var(--spacing-xl); }
+
+/* فئات النصوص */
+.text-xs { font-size: var(--text-xs); }
+.text-sm { font-size: var(--text-sm); }
+.text-lg { font-size: var(--text-lg); }
+.text-xl { font-size: var(--text-xl); }
+
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+.text-left { text-align: left; }
+
+.font-bold { font-weight: 700; }
+.font-semibold { font-weight: 600; }
+.font-medium { font-weight: 500; }
+
+/* فئات الألوان */
+.text-primary { color: var(--primary-500); }
+.text-secondary { color: var(--light-text-secondary); }
+.text-muted { color: var(--light-text-muted); }
+
+.bg-primary { background: var(--gradient-primary); }
+.bg-success { background: var(--gradient-success); }
+.bg-warning { background: var(--gradient-warning); }
+.bg-danger { background: var(--gradient-danger); }
+
+/* فئات الحدود */
+.rounded { border-radius: var(--border-radius); }
+.rounded-lg { border-radius: var(--border-radius-lg); }
+.rounded-xl { border-radius: var(--border-radius-xl); }
+.rounded-full { border-radius: var(--border-radius-full); }
+
+/* فئات الظلال */
+.shadow-sm { box-shadow: var(--shadow-sm); }
+.shadow-md { box-shadow: var(--shadow-md); }
+.shadow-lg { box-shadow: var(--shadow-lg); }
+.shadow-xl { box-shadow: var(--shadow-xl); }
+
+/* فئات الانتقالات */
+.transition-all { transition: var(--transition-all); }
+.transition-fast { transition: var(--transition-fast); }
+.transition-slow { transition: var(--transition-slow); }
+
+/* فئات العرض */
+.hidden { display: none; }
+.block { display: block; }
+.flex { display: flex; }
+.grid { display: grid; }
+
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.justify-end { justify-content: flex-end; }
+
+.items-center { align-items: center; }
+.items-start { align-items: flex-start; }
+.items-end { align-items: flex-end; }
+
+/* فئات الموضع */
+.relative { position: relative; }
+.absolute { position: absolute; }
+.fixed { position: fixed; }
+
+/* فئات خاصة للتفاعل المحسّن */
+.hover-lift:hover {
+  transform: translateY(-2px);
+  transition: var(--transition-all);
+}
+
+.hover-scale:hover {
+  transform: scale(1.02);
+  transition: var(--transition-all);
+}
+
+.focus-ring:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+}
+
+.glass-effect {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.gradient-text {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* تحسين السكرولبار */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--light-bg);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--gradient-primary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gradient-primary-hover);
+}
+
+/* تحسين التحديد النصي */
+::selection {
+  background: rgba(102, 126, 234, 0.3);
+  color: var(--light-text-primary);
+}
+
+::-moz-selection {
+  background: rgba(102, 126, 234, 0.3);
+  color: var(--light-text-primary);
+}
+
+/* إنهاء ملف CSS الاحترافي المطور */
+/* ======== تحسين تباعد أعمدة الجداول ======== */
+table td, table th {
+  padding: 1rem 1.5rem; /* زيادة التباعد داخل الخلايا */
+}
+
+/* تخصيص عرض عمود الترتيب ليكون أصغر */
+table th:first-child, table td:first-child {
+  width: 1%;
+  white-space: nowrap;
+}
+/* ======== (جديد) تنسيقات شريط التقدم والجدول العام ======== */
+
+/* إصلاح تباعد الأعمدة */
+table th:first-child, table td:first-child {
+  padding-right: 2rem; /* زيادة المسافة اليمنى للخلية الأولى */
+}
+
+.progress-cell {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem; /* المسافة بين الشريط والنص */
+  padding: 1rem;
+}
+
+/* الهيكل الخارجي لشريط التقدم (الإطار الأسود في الصورة) */
+.progress-bar-shell {
+  flex-grow: 1; /* يجعل الشريط يأخذ المساحة المتاحة */
+  height: 35px;
+  background-color: var(--light-bg); /* لون خلفية فاتح */
+  border-radius: 20px;
+  border: 3px solid #2d3748; /* إطار داكن */
+  padding: 4px; /* مسافة داخلية لخلق تأثير الإطار */
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* الشريط الداخلي الملون الذي يمثل التقدم */
+.progress-bar-fill {
+  height: 100%;
+  background: var(--gradient-success);
+  border-radius: 15px; /* حواف دائرية أصغر من الهيكل */
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* نص النسبة المئوية بجانب الشريط */
+.percentage-text {
+  font-family: var(--font-sans); /* استخدام خط الأرقام */
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: var(--light-text-primary);
+  min-width: 60px; /* ضمان عدم انضغاط النص */
+  text-align: right;
+}
+/* ======== تنسيقات أزرار تعديل وحذف الطالب ======== */
+
+.card-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.card-actions .btn-secondary,
+.card-actions .btn-danger {
+  padding: 0.5em 1em; /* تصغير حجم الأزرار قليلاً */
+  font-size: 0.9rem;
+}
+/* ======== تنسيقات بطاقة الطالب المحسّنة في لوحة التحكم ======== */
+
+.student-card-progress {
+  margin: 1.5rem 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  align-items: center;
+  gap: 1rem;
+}
+
+.progress-stats {
+  grid-column: 1 / 4; /* جعل الأرقام تمتد على عرض البطاقة */
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--light-border);
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-item span {
+  font-size: 0.9rem;
+  color: var(--light-text-secondary);
+}
+
+.stat-item strong {
+  display: block;
+  font-family: var(--font-sans);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--light-text-primary);
+}
+
+/* تعديل بسيط على شريط التقدم ليتناسب مع البطاقة */
+.progress-bar-shell.admin-bar {
+  grid-column: 1 / 3; /* جعل الشريط يأخذ معظم المساحة */
+  height: 25px; /* ارتفاع أنحف */
+  border: 2px solid #e2e8f0;
+  background-color: #f8fafc;
+}
+
+.percentage-text-card {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--light-text-primary);
+}
+/* ======== تنسيقات إضافية لجدول الزوار ======== */
+
+.stat-number {
+  font-family: var(--font-sans);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--light-text-primary);
+  display: block;
+  text-align: center;
+}
+
+/* تعديل عرض الأعمدة لتوزيع أفضل للمساحة */
+table th, table td {
+  vertical-align: middle;
+}
+
+table th:nth-child(1), table td:nth-child(1) { width: 1%; white-space: nowrap; } /* الرتبة */
+table th:nth-child(2), table td:nth-child(2) { width: 40%; } /* اسم الطالب */
+table th:nth-child(4), table td:nth-child(4),
+table th:nth-child(5), table td:nth-child(5) { 
+  width: 1%; 
+  white-space: nowrap; 
+  text-align: center;
+}
+/* ======== تنسيقات القوائم المنسدلة (Accordion) للسجلات ======== */
+
+.records-accordion {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.records-accordion details {
+  border-radius: var(--border-radius);
+  border: 1px solid var(--light-border);
+  overflow: hidden; /* لإخفاء الزوايا الحادة للجدول الداخلي */
+}
+
+.records-accordion summary {
+  padding: 1rem 1.5rem;
+  font-weight: 700;
+  cursor: pointer;
+  background-color: #f8fafc;
+  transition: background-color 0.2s;
+  list-style-type: '🗓️ '; /* أيقونة السنة */
+}
+.records-accordion .month-group > summary {
+  list-style-type: '📅 '; /* أيقونة الشهر */
+}
+
+
+.records-accordion summary:hover {
+  background-color: #f1f5f9;
+}
+
+.records-accordion details[open] > summary {
+  background-color: #eef2ff; /* لون مميز عند الفتح */
+  border-bottom: 1px solid var(--light-border);
+}
+
+.records-accordion table {
+  margin-top: 0; /* إزالة الهامش العلوي للجدول داخل القائمة */
+}
+
+.records-accordion table th {
+  background-color: #f8fafc; /* خلفية خفيفة لرأس الجدول */
+}

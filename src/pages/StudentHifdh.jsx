@@ -11,6 +11,8 @@ export default function StudentHifdh() {
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingRecord, setEditingRecord] = useState(null);
+  const [isBulkAddModalOpen, setIsBulkAddModalOpen] = useState(false);
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
 
   // Form state
   const [selectedSurahName, setSelectedSurahName] = useState(surahData[0].name);
@@ -18,11 +20,6 @@ export default function StudentHifdh() {
   const [endVerse, setEndVerse] = useState('');
   const [isCompleteSurah, setIsCompleteSurah] = useState(false);
   const [recordedAt, setRecordedAt] = useState(new Date().toISOString().split('T')[0]);
-
-  // ======== (بداية الإضافة الجديدة) ========
-  const [isBulkAddModalOpen, setIsBulkAddModalOpen] = useState(false);
-  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
-  // ======== (نهاية الإضافة الجديدة) ========
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -35,21 +32,19 @@ export default function StudentHifdh() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  const surahStatusMap = useMemo(() => {
-    const statusMap = {};
-    const versesBySurah = {};
-    records.forEach(r => {
-      if (!versesBySurah[r.surahs.name]) versesBySurah[r.surahs.name] = 0;
-      versesBySurah[r.surahs.name] += r.verses_memorized;
-    });
-    surahData.forEach(surah => {
-      const memorizedCount = versesBySurah[surah.name] || 0;
-      let status = 'not-started';
-      if (memorizedCount > 0) status = memorizedCount >= surah.verse_count ? 'completed' : 'in-progress';
-      statusMap[surah.name] = { status, memorizedVerses: memorizedCount, totalVerses: surah.verse_count };
-    });
-    return statusMap;
+  // ======== (بداية التعديل المهم: تحسين دالة التحقق من التقاطع) ========
+  const checkVerseOverlap = useCallback((surahName, newStart, newEnd, recordIdToIgnore = null) => {
+    const existingRecordsForSurah = records.filter(r => r.surahs.name === surahName && r.id !== recordIdToIgnore);
+    for (const record of existingRecordsForSurah) {
+      // الشرط (newStart <= record.end_verse AND newEnd >= record.start_verse) يتحقق من أي تداخل
+      if (newStart <= record.end_verse && newEnd >= record.start_verse) {
+        // إذا وجد تداخل، نرجع السجل المتقاطع لعرض رسالة خطأ مفصلة
+        return { hasOverlap: true, conflictingRecord: record };
+      }
+    }
+    return { hasOverlap: false, conflictingRecord: null }; // لا يوجد تداخل
   }, [records]);
+  // ======== (نهاية التعديل المهم) ========
 
   const handleAddRecord = async (e) => {
     e.preventDefault();
@@ -58,75 +53,82 @@ export default function StudentHifdh() {
     const newEndVerse = parseInt(endVerse);
     const surahInfo = surahData.find(s => s.name === selectedSurahName);
     if (!surahInfo) return;
+    if (newStartVerse > newEndVerse) return alert('آية البداية يجب أن تكون أصغر من أو تساوي آية النهاية.');
+    if (newEndVerse > surahInfo.verse_count) return alert(`رقم آية النهاية يتجاوز عدد آيات السورة (${surahInfo.verse_count}).`);
+    
+    // ======== (بداية التعديل المهم: تطبيق التحقق الصارم) ========
+    const overlapCheck = checkVerseOverlap(selectedSurahName, newStartVerse, newEndVerse);
+    if (overlapCheck.hasOverlap) {
+      alert(`خطأ: لا يمكن إضافة هذا المقطع لأنه يتقاطع مع مقطع محفوظ مسبقًا: (من الآية ${overlapCheck.conflictingRecord.start_verse} إلى ${overlapCheck.conflictingRecord.end_verse}).`);
+      return; // إيقاف عملية الحفظ
+    }
+    // ======== (نهاية التعديل المهم) ========
+
+    const verseCount = newEndVerse - newStartVerse + 1;
     const { error } = await supabase.from('memorized_portions').insert({
       student_id: studentId, surah_id: surahInfo.id, start_verse: newStartVerse,
-      end_verse: newEndVerse, verses_memorized: newEndVerse - newStartVerse + 1,
-      recorded_at: new Date(recordedAt).toISOString(),
+      end_verse: newEndVerse, verses_memorized: verseCount, recorded_at: new Date(recordedAt).toISOString(),
     });
     if (error) { alert("حدث خطأ: " + error.message); }
     else { alert("تمت الإضافة بنجاح!"); fetchData(); setStartVerse(''); setEndVerse(''); setIsCompleteSurah(false); }
   };
-
+  
   const handleBulkAdd = async (selectedSurahNames) => {
     const recordsToInsert = [];
+    const skippedSurahs = [];
+
     for (const surahName of selectedSurahNames) {
       const surahInfo = surahData.find(s => s.name === surahName);
-      if (surahInfo && surahStatusMap[surahName]?.status !== 'completed') {
-        recordsToInsert.push({
-          student_id: studentId, surah_id: surahInfo.id, start_verse: 1,
-          end_verse: surahInfo.verse_count, verses_memorized: surahInfo.verse_count,
-          recorded_at: new Date(recordedAt).toISOString(),
-        });
+      if (!surahInfo) continue;
+
+      // ======== (بداية التعديل المهم: التحقق من التداخل في الإضافة الجماعية) ========
+      const overlapCheck = checkVerseOverlap(surahName, 1, surahInfo.verse_count);
+      if (overlapCheck.hasOverlap) {
+        skippedSurahs.push(surahName); // إضافة السورة إلى قائمة السور التي تم تجاهلها
+        continue; // تجاهل هذه السورة والانتقال للتالية
       }
+      // ======== (نهاية التعديل المهم) ========
+
+      recordsToInsert.push({
+        student_id: studentId, surah_id: surahInfo.id, start_verse: 1,
+        end_verse: surahInfo.verse_count, verses_memorized: surahInfo.verse_count,
+        recorded_at: new Date(recordedAt).toISOString(),
+      });
     }
-    if (recordsToInsert.length === 0) return;
+
+    if (skippedSurahs.length > 0) {
+      alert(`تم تجاهل السور التالية لوجود مقاطع محفوظة تتقاطع معها:\n- ${skippedSurahs.join('\n- ')}`);
+    }
+
+    if (recordsToInsert.length === 0) {
+        if (skippedSurahs.length === 0) alert("الرجاء اختيار سورة واحدة على الأقل.");
+        return;
+    };
+
     const { error } = await supabase.from('memorized_portions').insert(recordsToInsert);
     if (error) { alert('حدث خطأ: ' + error.message); }
-    else { alert(`تمت إضافة ${recordsToInsert.length} سورة بنجاح!`); fetchData(); }
+    else { alert(`تمت إضافة ${recordsToInsert.length} سورة جديدة بنجاح!`); fetchData(); }
   };
-
-  // ======== (بداية الإضافة الجديدة: دالة الحذف الجماعي) ========
-  const handleBulkDelete = async (selectedSurahNames) => {
-    if (!window.confirm(`هل أنت متأكد من حذف كل سجلات الحفظ المتعلقة بـ ${selectedSurahNames.length} سورة؟ لا يمكن التراجع عن هذا الإجراء.`)) {
-      return;
-    }
-
-    // الحصول على IDs السور المراد حذفها
-    const surahIdsToDelete = surahData
-      .filter(s => selectedSurahNames.includes(s.name))
-      .map(s => s.id);
-
-    if (surahIdsToDelete.length === 0) return;
-
-    // تنفيذ الحذف من قاعدة البيانات
-    const { error } = await supabase
-      .from('memorized_portions')
-      .delete()
-      .eq('student_id', studentId)
-      .in('surah_id', surahIdsToDelete);
-
-    if (error) {
-      alert("حدث خطأ أثناء الحذف: " + error.message);
-    } else {
-      alert(`تم حذف سجلات ${selectedSurahNames.length} سورة بنجاح.`);
-      fetchData();
-    }
-  };
-  // ======== (نهاية الإضافة الجديدة) ========
-
+  
   const handleDeleteRecord = async (recordId) => {
     if (window.confirm("هل أنت متأكد من حذف هذا السجل؟")) {
       const { error } = await supabase.from('memorized_portions').delete().eq('id', recordId);
-      if (error) { alert("خطأ في الحذف: " + error.message); }
-      else { alert("تم الحذف بنجاح."); fetchData(); }
+      if (error) { alert("خطأ في الحذف: " + error.message); } else { alert("تم الحذف بنجاح."); fetchData(); }
     }
   };
 
   const handleUpdateRecord = async (updatedRecord) => {
     const { surahs, ...recordToUpdate } = updatedRecord;
     const { error } = await supabase.from('memorized_portions').update(recordToUpdate).eq('id', recordToUpdate.id);
-    if (error) { alert("خطأ في التعديل: " + error.message); }
-    else { alert("تم التعديل بنجاح."); setEditingRecord(null); fetchData(); }
+    if (error) { alert("خطأ في التعديل: " + error.message); } else { alert("تم التعديل بنجاح."); setEditingRecord(null); fetchData(); }
+  };
+  
+  const handleBulkDelete = async (selectedSurahNames) => {
+    if (!window.confirm(`هل أنت متأكد من حذف كل سجلات الحفظ المتعلقة بـ ${selectedSurahNames.length} سورة؟`)) return;
+    const surahIdsToDelete = surahData.filter(s => selectedSurahNames.includes(s.name)).map(s => s.id);
+    if (surahIdsToDelete.length === 0) return;
+    const { error } = await supabase.from('memorized_portions').delete().eq('student_id', studentId).in('surah_id', surahIdsToDelete);
+    if (error) { alert("حدث خطأ: " + error.message); } else { alert(`تم حذف سجلات ${selectedSurahNames.length} سورة بنجاح.`); fetchData(); }
   };
 
   const selectedSurahInfo = useMemo(() => surahData.find(s => s.name === selectedSurahName), [selectedSurahName]);
@@ -155,6 +157,22 @@ export default function StudentHifdh() {
     return groups;
   }, [records]);
 
+  const surahStatusMap = useMemo(() => {
+    const statusMap = {};
+    const versesBySurah = {};
+    records.forEach(r => {
+      if (!versesBySurah[r.surahs.name]) versesBySurah[r.surahs.name] = 0;
+      versesBySurah[r.surahs.name] += r.verses_memorized;
+    });
+    surahData.forEach(surah => {
+      const memorizedCount = versesBySurah[surah.name] || 0;
+      let status = 'not-started';
+      if (memorizedCount > 0) status = memorizedCount >= surah.verse_count ? 'completed' : 'in-progress';
+      statusMap[surah.name] = { status, memorizedVerses: memorizedCount, totalVerses: surah.verse_count };
+    });
+    return statusMap;
+  }, [records]);
+  
   const availableSurahsForBulkAdd = useMemo(() => surahData.filter(s => surahStatusMap[s.name]?.status !== 'completed').map(s => s.name), [surahStatusMap]);
   const availableSurahsForBulkDelete = useMemo(() => surahData.filter(s => surahStatusMap[s.name]?.status === 'completed').map(s => s.name), [surahStatusMap]);
 
@@ -192,9 +210,7 @@ export default function StudentHifdh() {
           </div>
           <div style={{display: 'flex', gap: '1rem'}}>
             <button onClick={() => setIsBulkAddModalOpen(true)} className="btn-success">إضافة سور دفعة واحدة</button>
-            {/* ======== (بداية الإضافة الجديدة: زر الحذف الجماعي) ======== */}
             <button onClick={() => setIsBulkDeleteModalOpen(true)} className="btn-danger">حذف سور دفعة واحدة</button>
-            {/* ======== (نهاية الإضافة الجديدة) ======== */}
           </div>
         </div>
       </div>
@@ -246,7 +262,6 @@ export default function StudentHifdh() {
       
       <EditRecordModal isOpen={!!editingRecord} onClose={() => setEditingRecord(null)} onSave={handleUpdateRecord} record={editingRecord} />
       
-      {/* ======== (بداية التعديل: استدعاء النافذة المنبثقة للإضافة والحذف) ======== */}
       <BulkAddSurahModal 
         isOpen={isBulkAddModalOpen}
         onClose={() => setIsBulkAddModalOpen(false)}
@@ -254,7 +269,7 @@ export default function StudentHifdh() {
         availableSurahs={availableSurahsForBulkAdd}
         title="إضافة سور مكتملة (حفظ)"
         actionButtonText="حفظ السور المحددة"
-        actionButtonClass="btn-success"
+        actionButtonClass="btn btn-success"
       />
       <BulkAddSurahModal 
         isOpen={isBulkDeleteModalOpen}
@@ -263,14 +278,12 @@ export default function StudentHifdh() {
         availableSurahs={availableSurahsForBulkDelete}
         title="حذف سور مكتملة"
         actionButtonText="حذف السور المحددة"
-        actionButtonClass="btn-danger"
+        actionButtonClass="btn btn-danger"
       />
-      {/* ======== (نهاية التعديل) ======== */}
     </div>
   );
 }
 
-// دالة تنسيق التاريخ خارج المكون الرئيسي
 function formatDate(dateString) {
   if (!dateString) return null;
   const date = new Date(dateString);
